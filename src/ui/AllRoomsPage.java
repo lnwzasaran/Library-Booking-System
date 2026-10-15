@@ -35,7 +35,7 @@ public class AllRoomsPage extends JPanel {   // สืบทอด JPanel
             add(cards[i]);                                 // ใส่การ์ดลงในหน้า
         }                                                  // จบ for
 
-        emptyLabel = new JLabel("วันนี้ไม่มีห้องว่างแล้ว", JLabel.CENTER);   // ข้อความตอนห้องเต็มทุกห้อง
+        emptyLabel = new JLabel("ขณะนี้ไม่มีห้องว่าง", JLabel.CENTER);       // ข้อความตอนทุกห้องมีคนใช้อยู่
         emptyLabel.setFont(Theme.font(Font.PLAIN, 18));                    // ตัวปกติ 18
         emptyLabel.setForeground(Theme.TEXT_GRAY);                         // สีเทา
         emptyLabel.setBounds(0, 300, 1172, 30);                            // กลางหน้า

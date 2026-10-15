@@ -204,7 +204,7 @@ public class AppFrame extends JFrame implements ActionListener, MouseListener { 
             header.setVisible(true);       // แสดงแถบบน
         }                                  // จบ if
         if (page == allRoomsPage) {                                       // ถ้าจะแสดงหน้าดูห้องทั้งหมด
-            allRoomsPage.refresh(RoomService.loadFreeRooms());            // อ่านไฟล์ใหม่ แล้วแสดงเฉพาะห้องที่ยังไม่ถูกจองวันนี้
+            allRoomsPage.refresh(RoomService.loadFreeRooms());            // อ่านไฟล์ใหม่ แล้วแสดงเฉพาะห้องที่ว่างตอนนี้ (ตามเวลาจริง)
         }                                                                 // จบ if
         if (page == bookRoomPage) {                                       // ถ้าจะแสดงหน้าจองห้อง
             bookRoomPage.getDateField().setText(BookingService.today());  // ตั้งช่องวันที่เป็นวันนี้ (dd/MM/yyyy)

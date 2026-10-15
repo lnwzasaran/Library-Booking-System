@@ -199,15 +199,16 @@ public class AdminPage extends JPanel implements ActionListener {   // สืบ
 
     // การ์ดสรุป 4 ใบ: อ่าน rooms.csv / bookings.csv / users.csv ใหม่ แล้วใส่ตัวเลขจริง
     //   ห้องทั้งหมด = จำนวนห้องใน rooms.csv
-    //   ห้องไม่ว่าง = ห้องที่มีการจอง BOOKED ของวันนี้ใน bookings.csv (ยกเลิกแล้วไม่นับ) — เกณฑ์เดียวกับหน้าหลักนิสิต
+    //   ห้องไม่ว่าง = ห้องที่มีการจอง BOOKED ของวันนี้ และตอนนี้อยู่ในช่วงเวลาที่จอง (ยังไม่ถึงเวลา / หมดเวลาแล้ว ไม่นับ)
+    //               — เกณฑ์เดียวกับกล่อง "สถานะห้อง" ทางขวา ตัวเลขจึงตรงกันเสมอ (Timer อัปเดตทุกต้นนาที)
     //   ห้องว่าง   = ห้องทั้งหมด - ห้องไม่ว่าง
     //   ผู้ใช้ทั้งหมด = จำนวนนิสิตใน users.csv
     public void refreshStats() {
         ArrayList<Room> rooms = RoomService.loadRooms();               // ห้องทั้งหมดจากไฟล์
         ArrayList<Booking> bookings = BookingService.loadBookings();   // การจองทั้งหมดจากไฟล์
         int total = rooms.size();                                      // จำนวนห้องทั้งหมด
-        int free = RoomService.countFreeRooms(rooms, bookings, BookingService.today());   // ห้องที่ไม่มีการจองวันนี้
-        int busy = total - free;                                       // ห้องที่มีการจองวันนี้
+        int free = RoomService.countFreeRooms(rooms, bookings, BookingService.today());   // ห้องที่ว่างตอนนี้ (ตามเวลาจริง)
+        int busy = total - free;                                       // ห้องที่กำลังถูกใช้ตอนนี้ (ตรงกับกล่องสถานะห้อง)
         int users = UserService.loadUsers().size();                    // จำนวนนิสิตที่สมัครแล้ว
         totalRoomsCard.getValueLabel().setText(total + " ห้อง");       // ใส่ตัวเลขในการ์ด
         freeRoomsCard.getValueLabel().setText(free + " ห้อง");
@@ -218,16 +219,15 @@ public class AdminPage extends JPanel implements ActionListener {   // สืบ
     // อ่าน bookings.csv ใหม่ แล้วตั้งสถานะทุกห้อง: มีการจองที่ครอบคลุมเวลาตอนนี้ = ไม่ว่าง, ไม่มี = ว่าง
     // AppFrame เรียกตอนเปิดหน้า Admin และ Timer เรียกทุกต้นนาที
     public void refreshRoomStatus() {
-        ArrayList<Booking> bookings = BookingService.loadBookings();   // อ่านการจองทั้งหมดจากไฟล์
+        ArrayList<Booking> bookings = BookingService.loadBookings();   // อ่านการจองทั้งหมดจาก bookings.csv
         String today = BookingService.today();                         // วันนี้ (dd/MM/yyyy)
         int now = BookingService.nowMinutes();                         // เวลาตอนนี้เป็นนาที
         String[] ids = roomStatus.getRoomIds();                        // รหัสห้องแต่ละแถวในกล่อง
         for (int i = 0; i < ids.length; i++) {                         // วนทุกห้อง
-            Booking b = BookingService.findCurrent(bookings, ids[i], today, now);   // การจองที่กำลังใช้ห้องนี้อยู่
-            if (b != null) {                                           // มีการจองในช่วงเวลานี้
-                String time = BookingService.timeRange(b);                       // เช่น "13:00 - 15:00"
-                roomStatus.setStatus(i, true, time);                   // → ไม่ว่าง + ช่วงเวลา
-            } else {                                                   // ไม่มีการจองช่วงนี้
+            Booking b = BookingService.findCurrent(bookings, ids[i], today, now);   // การจองที่กำลังใช้ห้องนี้อยู่ตอนนี้
+            if (b != null) {                                           // ถึงช่วงเวลาที่จองแล้ว (และยังไม่หมดเวลา)
+                roomStatus.setStatus(i, true, BookingService.timeRange(b));   // → ไม่ว่าง + ช่วงเวลา เช่น "13:00 - 15:00"
+            } else {                                                   // ยังไม่ถึงเวลาที่จอง / หมดเวลาแล้ว / ไม่มีการจอง
                 roomStatus.setStatus(i, false, "");                    // → ว่าง
             }                                                          // จบ if
         }                                                              // จบ for

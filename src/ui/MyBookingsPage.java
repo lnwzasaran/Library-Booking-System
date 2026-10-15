@@ -140,6 +140,8 @@ public class MyBookingsPage extends JPanel implements ActionListener {   // ส�
             pendingCancel = null;                                      // ล้างทิ้ง
             if (b != null && BookingService.cancel(b.getId(), b.getDate(), studentId)) {   // เปลี่ยนสถานะในไฟล์เป็น CANCELLED
                 refresh(studentId);                                    // สร้างตารางใหม่ → แถวนี้ย้ายไปประวัติ ป้าย "ยกเลิกแล้ว"
+                MessagePanel.showMessage(this, "ยกเลิกการจอง " + b.getId() + " เรียบร้อยแล้ว สามารถจองห้องใหม่ได้",
+                        "ยกเลิกสำเร็จ", MessagePanel.INFO);           // แจ้งผลให้ผู้ใช้รู้ (จองได้ครั้งละ 1 รายการ จึงบอกว่าจองใหม่ได้แล้ว)
             } else {                                                   // บันทึกไฟล์ไม่ได้
                 MessagePanel.showMessage(this, "ยกเลิกการจองไม่สำเร็จ กรุณาลองใหม่", "ยกเลิกไม่สำเร็จ", MessagePanel.ERROR);   // แจ้งผู้ใช้
             }                                                          // จบ if

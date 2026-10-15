@@ -41,12 +41,12 @@ public class BookRoomPage extends JPanel implements ItemListener, KeyListener { 
                           "14.00", "15.00", "16.00", "17.00", "18.00"};                      // ถึง 18.00 (BookingService.OPEN_HOUR / CLOSE_HOUR)
 
         // แถวที่ 1: วันที่ / เวลาเริ่ม / เวลาสิ้นสุด
-        addLabel(form, "เลือกวันที่", 16, 14);                          // ป้ายชื่อช่อง
+        addLabel(form, "เลือกวันที่ (วันนี้ / พรุ่งนี้)", 16, 14);       // ป้ายชื่อช่อง (จองล่วงหน้าได้ 1 วัน)
         RoundPanel dateBox = new RoundPanel(Theme.WHITE, Theme.TEXT); // กรอบสี่เหลี่ยมของช่องวันที่ (ขอบสีเข้ม)
         dateBox.setBounds(16, 40, 196, 32);                              // วางใต้ป้ายชื่อ
         form.add(dateBox);                                               // ใส่ลงในฟอร์ม
 
-        dateField = new JTextField("13/10/2026");        // ช่องพิมพ์วันที่ (ค่าตัวอย่าง)
+        dateField = new JTextField(BookingService.today());   // ช่องวันที่ = วันนี้ (AppFrame ตั้งใหม่ทุกครั้งที่เปิดหน้า)
         dateField.setFont(Theme.font(Font.PLAIN, 14));   // ตัวปกติ 14
         dateField.setBorder(null);                       // ไม่เอากรอบของ JTextField (ใช้กรอบของ RoundPanel แทน)
         dateField.setBounds(10, 2, 150, 28);             // วางในกรอบ

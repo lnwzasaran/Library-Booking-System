@@ -15,7 +15,7 @@ public class BookingService {
 
     // ---------- กฎการจอง ----------
     public static final int MAX_HOURS = 2;          // จองได้ไม่เกิน 2 ชั่วโมงต่อครั้ง
-    public static final int MAX_PER_DAY = 1;        // 1 คนจองได้วันละ 1 ครั้ง
+    public static final int MAX_ACTIVE = 1;         // 1 คนมีการจองที่ยังไม่หมดเวลาได้แค่ 1 รายการ
     public static final int MAX_DAYS_AHEAD = 1;     // จองล่วงหน้าได้ 1 วัน (วันนี้ หรือ พรุ่งนี้)
     public static final int OPEN_HOUR = 9;          // เปิดให้จองตั้งแต่ 09.00
     public static final int CLOSE_HOUR = 18;        // จองได้ถึง 18.00 (เวลาสิ้นสุดห้ามเกิน 18.00)
@@ -77,16 +77,23 @@ public class BookingService {
         if (hours > MAX_HOURS) {                                     // เกิน 2 ชั่วโมง
             return "จองได้ไม่เกิน " + MAX_HOURS + " ชั่วโมงต่อครั้ง (เลือกไว้ " + hours + " ชั่วโมง)";   // แจ้งเหตุผล
         }                                                            // จบ if
+        if (date.equals(today()) && hourOf(end) * 60 <= nowMinutes()) {   // จองของวันนี้ แต่เวลาสิ้นสุดผ่านไปแล้ว
+            return "ช่วงเวลา " + start + " - " + end + " ผ่านไปแล้ว กรุณาเลือกเวลาใหม่";   // แจ้งเหตุผล
+        }                                                            // จบ if
 
-        // 3) 1 คนจองได้วันละ 1 ครั้ง
-        int sameDay = 0;                                             // จำนวนการจองของคนนี้ในวันนั้น
+        // 3) 1 คนจองได้แค่ 1 ครั้ง (รวมการจองล่วงหน้า): ถ้ายังมีการจองที่ยังไม่ยกเลิกและยังไม่หมดเวลา จะจองเพิ่มไม่ได้
+        //    เช่น จองของพรุ่งนี้ไว้แล้ว → วันนี้จองไม่ได้ (ยกเลิกการจองเดิม หรือรอให้หมดเวลาใช้ห้องก่อน จึงจองใหม่ได้)
+        int active = 0;                                              // จำนวนการจองที่ยังใช้งานอยู่ของคนนี้
+        Booking current = null;                                      // จำการจองที่ค้างอยู่ ไว้บอกในข้อความ
         for (Booking b : bookings) {                                 // วนทุกการจอง
-            if (b.isActive() && b.getStudentId().equals(studentId) && b.getDate().equals(date)) {   // ของคนนี้ วันเดียวกัน ยังไม่ยกเลิก
-                sameDay++;                                           // นับเพิ่ม
+            if (b.isActive() && b.getStudentId().equals(studentId) && !isFinished(b)) {   // ของคนนี้ ยังไม่ยกเลิก ยังไม่หมดเวลา
+                active++;                                            // นับเพิ่ม
+                current = b;                                         // จำไว้
             }                                                        // จบ if
         }                                                            // จบ for
-        if (sameDay >= MAX_PER_DAY) {                                // ครบโควตาแล้ว
-            return "คุณจองไปแล้วในวันที่ " + date + " (จองได้วันละ " + MAX_PER_DAY + " ครั้ง)";   // แจ้งเหตุผล
+        if (active >= MAX_ACTIVE) {                                  // ครบโควตาแล้ว
+            return "คุณมีการจองอยู่แล้ว (ห้อง " + current.getRoomId() + " วันที่ " + current.getDate() + " เวลา " + timeRange(current)
+                    + ") จองได้ครั้งละ " + MAX_ACTIVE + " รายการ";       // แจ้งเหตุผล
         }                                                            // จบ if
 
         // 4) ห้องเดียวกันห้ามจองเวลาทับกัน (README ข้อ 7)

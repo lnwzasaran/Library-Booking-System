@@ -9,7 +9,7 @@ import java.util.ArrayList;   // ลิสต์ห้องที่อ่า�
  * กล่อง "สถานะห้อง" ด้านขวาของหน้า Admin — รายการห้องจาก rooms.csv พร้อมป้าย ว่าง / ไม่ว่าง
  *   - แต่ละห้องสร้างป้ายไว้ 2 อัน (ว่าง สีเขียว, ไม่ว่าง สีแดง) แล้วสลับด้วย setVisible
  *   - ใต้ป้าย "ไม่ว่าง" มีข้อความบอกช่วงเวลาที่ถูกจอง เช่น "13:00 - 15:00"
- *   - AdminPage เรียก setStatus(...) ตามการจองในเวลาปัจจุบัน
+ *   - AdminPage เรียก setStatus(...) ตามการจองใน bookings.csv ที่ครอบคลุมเวลาตอนนี้
  */
 public class RoomStatusPanel extends RoundPanel {   // สืบทอด RoundPanel (กล่องสี่เหลี่ยม)
 

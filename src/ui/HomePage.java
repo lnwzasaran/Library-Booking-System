@@ -93,7 +93,7 @@ public class HomePage extends JPanel {   // สืบทอด JPanel
         String today = BookingService.today();                       // วันที่วันนี้ เช่น 13/10/2026
 
         int total = rooms.size();                                                  // ห้องทั้งหมด = จำนวนแถวใน rooms.csv
-        int free = RoomService.countFreeRooms(rooms, bookings, today);             // ห้องที่ไม่มีการจองวันนี้
+        int free = RoomService.countFreeRooms(rooms, bookings, today);             // ห้องที่ว่างตอนนี้ (ตามเวลาจริง)
         int mine = BookingService.countMyBookings(bookings, studentId);            // การจองที่ยังไม่ยกเลิกของนิสิตคนนี้
         int todayCount = BookingService.countToday(bookings, today);               // การจองทั้งหมดของวันนี้
 
