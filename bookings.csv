@@ -1,1 +1,2 @@
 bookingId,studentId,roomId,date,startTime,endTime,people,status
+LBA-101,6821651787,A101,16/10/2026,09.00,11.00,6,CANCELLED
