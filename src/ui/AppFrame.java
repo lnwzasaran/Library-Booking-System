@@ -183,6 +183,7 @@ public class AppFrame extends JFrame implements ActionListener, MouseListener { 
         hideAll();                         // ซ่อนทุกหน้าก่อน
         adminPage.refreshLatest();         // อ่าน bookings.csv ใหม่ แล้วอัปเดตตาราง "การจองล่าสุด"
         adminPage.refreshRoomStatus();     // อ่าน bookings.csv ใหม่ แล้วตั้งสถานะห้องตามเวลาตอนนี้
+        adminPage.refreshStats();          // อ่านไฟล์ csv ใหม่ แล้วอัปเดตการ์ดสรุป (ห้องทั้งหมด / ว่าง / ไม่ว่าง / ผู้ใช้)
         adminPage.setVisible(true);        // แสดงหน้า Admin (มี sidebar และแถบบนของตัวเองอยู่แล้ว)
         setTitle("Admin Dashboard");       // เปลี่ยนชื่อหน้าต่าง
     }                                      // จบ showAdmin

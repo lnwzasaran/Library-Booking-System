@@ -108,13 +108,13 @@ public class AdminPage extends JPanel implements ActionListener {   // สืบ
         add(stats);                                                        // ใส่ลงในหน้า
 
         totalRoomsCard = new AdminStatCard(IconPanel.DOOR_FILLED, Theme.PRIMARY,                      // ประตูน้ำเงิน
-                new Color(0xEEF4FC), new Color(0xC9D8EE), "ห้องทั้งหมด", "10 ห้อง");                    // พื้นฟ้าอ่อน
+                new Color(0xEEF4FC), new Color(0xC9D8EE), "ห้องทั้งหมด", "0 ห้อง");   // ตัวเลขจริงใส่ใน refreshStats                    // พื้นฟ้าอ่อน
         freeRoomsCard = new AdminStatCard(IconPanel.DOOR_FILLED, new Color(0x0B7A0B),                 // ประตูเขียว
-                new Color(0xEAFBEA), new Color(0xC6E9C6), "ห้องว่าง", "1 ห้อง");                        // พื้นเขียวอ่อน
+                new Color(0xEAFBEA), new Color(0xC6E9C6), "ห้องว่าง", "0 ห้อง");                        // พื้นเขียวอ่อน
         busyRoomsCard = new AdminStatCard(IconPanel.DOOR_LOCK, new Color(0xC81E1E),                   // ประตูแดง + กุญแจ
-                new Color(0xFDF0F0), new Color(0xF0CACA), "ห้องไม่ว่าง", "1 ห้อง");                      // พื้นชมพูอ่อน
+                new Color(0xFDF0F0), new Color(0xF0CACA), "ห้องไม่ว่าง", "0 ห้อง");                      // พื้นชมพูอ่อน
         usersCard = new AdminStatCard(IconPanel.USERS_PLUS, new Color(0x9333EA),                      // คนสีม่วง
-                new Color(0xF3ECFD), new Color(0xDCCBF5), "ผู้ใช้ทั้งหมด", "1 คน");                       // พื้นม่วงอ่อน
+                new Color(0xF3ECFD), new Color(0xDCCBF5), "ผู้ใช้ทั้งหมด", "0 คน");                       // พื้นม่วงอ่อน
 
         totalRoomsCard.setBounds(10, 10, 142, 136);    // การ์ดที่ 1
         freeRoomsCard.setBounds(186, 10, 142, 136);    // การ์ดที่ 2 (ห่างกัน 176)
@@ -173,6 +173,7 @@ public class AdminPage extends JPanel implements ActionListener {   // สืบ
 
         updateClock();                                  // ใส่วันที่/เวลาจริงครั้งแรก
         refreshRoomStatus();                            // ใส่สถานะห้องครั้งแรก
+        refreshStats();                                 // ใส่ตัวเลขในการ์ดสรุปครั้งแรก
         timer = new Timer(1000, this);                  // ทุก 1000 มิลลิวินาที (1 วินาที) เรียก actionPerformed ของคลาสนี้
         timer.start();                                  // เริ่มจับเวลา
     }                                                         // จบคอนสตรักเตอร์
@@ -184,6 +185,7 @@ public class AdminPage extends JPanel implements ActionListener {   // สืบ
             SimpleDateFormat sec = new SimpleDateFormat("ss", Locale.US);      // รูปแบบ "วินาที"
             if (sec.format(new Date()).equals("00")) {              // ทุกต้นนาที (วินาที = 00)
                 refreshRoomStatus();                                // อ่านไฟล์ใหม่ แล้วเปลี่ยนสถานะห้องตามเวลา
+                refreshStats();                                     // และอัปเดตตัวเลขในการ์ดสรุป (ขึ้นวันใหม่ตัวเลขจะเปลี่ยนเอง)
             }                                                       // จบ if
         }                                                           // จบ if
     }                                                               // จบ actionPerformed
@@ -194,6 +196,24 @@ public class AdminPage extends JPanel implements ActionListener {   // สืบ
         SimpleDateFormat format = new SimpleDateFormat("HH:mm", Locale.US);              // รูปแบบ ชั่วโมง:นาที (24 ชม.)
         timeLabel.setText(format.format(new Date()) + " น.");                 // เวลาตอนนี้
     }                                                                         // จบ updateClock
+
+    // การ์ดสรุป 4 ใบ: อ่าน rooms.csv / bookings.csv / users.csv ใหม่ แล้วใส่ตัวเลขจริง
+    //   ห้องทั้งหมด = จำนวนห้องใน rooms.csv
+    //   ห้องไม่ว่าง = ห้องที่มีการจอง BOOKED ของวันนี้ใน bookings.csv (ยกเลิกแล้วไม่นับ) — เกณฑ์เดียวกับหน้าหลักนิสิต
+    //   ห้องว่าง   = ห้องทั้งหมด - ห้องไม่ว่าง
+    //   ผู้ใช้ทั้งหมด = จำนวนนิสิตใน users.csv
+    public void refreshStats() {
+        ArrayList<Room> rooms = RoomService.loadRooms();               // ห้องทั้งหมดจากไฟล์
+        ArrayList<Booking> bookings = BookingService.loadBookings();   // การจองทั้งหมดจากไฟล์
+        int total = rooms.size();                                      // จำนวนห้องทั้งหมด
+        int free = RoomService.countFreeRooms(rooms, bookings, BookingService.today());   // ห้องที่ไม่มีการจองวันนี้
+        int busy = total - free;                                       // ห้องที่มีการจองวันนี้
+        int users = UserService.loadUsers().size();                    // จำนวนนิสิตที่สมัครแล้ว
+        totalRoomsCard.getValueLabel().setText(total + " ห้อง");       // ใส่ตัวเลขในการ์ด
+        freeRoomsCard.getValueLabel().setText(free + " ห้อง");
+        busyRoomsCard.getValueLabel().setText(busy + " ห้อง");
+        usersCard.getValueLabel().setText(users + " คน");
+    }                                                                  // จบ refreshStats
 
     // อ่าน bookings.csv ใหม่ แล้วตั้งสถานะทุกห้อง: มีการจองที่ครอบคลุมเวลาตอนนี้ = ไม่ว่าง, ไม่มี = ว่าง
     // AppFrame เรียกตอนเปิดหน้า Admin และ Timer เรียกทุกต้นนาที
