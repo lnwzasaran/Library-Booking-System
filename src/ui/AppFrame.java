@@ -52,6 +52,9 @@ public class AppFrame extends JFrame implements ActionListener, MouseListener { 
         Font thai = Theme.font(Font.PLAIN, 14);              // ฟอนต์ Tahoma ขนาด 14
         UIManager.put("OptionPane.messageFont", thai);       // ข้อความในกล่อง JOptionPane
         UIManager.put("OptionPane.buttonFont", thai);        // ปุ่มในกล่อง (OK / ใช่ / ไม่)
+        UIManager.put("OptionPane.yesButtonText", "ใช่");    // ปุ่ม Yes ของ showConfirmDialog เป็นภาษาไทย
+        UIManager.put("OptionPane.noButtonText", "ไม่");     // ปุ่ม No เป็นภาษาไทย
+        UIManager.put("OptionPane.okButtonText", "ตกลง");    // ปุ่ม OK เป็นภาษาไทย
         UIManager.put("Label.font", thai);                   // JLabel ที่ไม่ได้ตั้งฟอนต์เอง
         UIManager.put("Button.font", thai);                  // JButton ที่ไม่ได้ตั้งฟอนต์เอง
         UIManager.put("ComboBox.font", thai);                // dropdown (รวมรายการที่กางออก)
@@ -63,7 +66,6 @@ public class AppFrame extends JFrame implements ActionListener, MouseListener { 
     public void Initial() {                                                                 // เริ่มเมธอด Initial
         cp = getContentPane();               // ขอ content pane ของ JFrame (บทที่ 8)
         cp.setLayout(null);                  // ไม่ใช้ Layout Manager — วางด้วย setBounds
-        setGlassPane(new MessagePanel());    // กล่องข้อความแบบ JPanel: แผ่นใสวางทับทั้งหน้าต่าง (ซ่อนไว้จนกว่าจะเรียก MessagePanel.showMessage)
     }                                        // จบ Initial
 
     // 2) สร้างทุกหน้า + วางตำแหน่ง + ผูก Event
@@ -256,7 +258,7 @@ public class AppFrame extends JFrame implements ActionListener, MouseListener { 
 
         String error = UserService.register(id, name, email, phone, password, confirm);   // logic ตรวจข้อมูล + บันทึกลง users.csv
         if (error != null) {                                                 // ไม่สำเร็จ
-            MessagePanel.showMessage(this, error, "สมัครไม่สำเร็จ", MessagePanel.ERROR);   // กล่องแจ้งข้อผิดพลาด (ไอคอนแดงกากบาท)
+            JOptionPane.showMessageDialog(this, error, "สมัครไม่สำเร็จ", JOptionPane.ERROR_MESSAGE);   // กล่องแจ้งข้อผิดพลาด (JOptionPane ไอคอนผิดพลาด)
             return;                                                          // หยุด
         }                                                                    // จบ if
 
@@ -267,7 +269,7 @@ public class AppFrame extends JFrame implements ActionListener, MouseListener { 
         registerPage.getPasswordBox().clear();
         registerPage.getConfirmPasswordBox().clear();
         showLogin();                                                         // กลับไปหน้าเข้าสู่ระบบ
-        MessagePanel.showMessage(this, "สมัครสำเร็จ", "สมัครสมาชิก", MessagePanel.INFO);   // กล่องแจ้งข้อมูล (ไอคอนฟ้าตัว i) ทับหน้าเข้าสู่ระบบ
+        JOptionPane.showMessageDialog(this, "สมัครสำเร็จ", "สมัครสมาชิก", JOptionPane.INFORMATION_MESSAGE);   // กล่องแจ้งข้อมูล (ไอคอนฟ้าตัว i) ทับหน้าเข้าสู่ระบบ
     }                                                                        // จบ register
 
     // ใส่ข้อมูลผู้ใช้ที่เข้าสู่ระบบลงในหน้าต่าง ๆ (แถบบน, หน้าหลัก, ข้อมูลส่วนตัว)
@@ -282,7 +284,7 @@ public class AppFrame extends JFrame implements ActionListener, MouseListener { 
 
     // กล่องข้อความแจ้งเหตุผลที่จองไม่สำเร็จ
     private void showError(String message) {
-        MessagePanel.showMessage(this, message, "จองไม่สำเร็จ", MessagePanel.ERROR);   // กล่องแจ้งข้อผิดพลาด (ไอคอนแดงกากบาท)
+        JOptionPane.showMessageDialog(this, message, "จองไม่สำเร็จ", JOptionPane.ERROR_MESSAGE);   // กล่องแจ้งข้อผิดพลาด (JOptionPane ไอคอนผิดพลาด)
     }                                                                                              // จบ showError
 
     // ================= ActionListener (ปุ่ม) =================
@@ -293,7 +295,7 @@ public class AppFrame extends JFrame implements ActionListener, MouseListener { 
             if (AdminService.isAdminId(id)) {                                 // ถ้าเป็นรหัสของ admin (มีใน admins.csv)
                 String name = AdminService.login(id, password);               // ตรวจรหัสผ่านกับไฟล์ (ถูก = ได้ชื่อ, ผิด = null)
                 if (name == null) {                                           // รหัสผ่านไม่ถูกต้อง
-                    MessagePanel.showMessage(this, "รหัสผ่านของผู้ดูแลระบบไม่ถูกต้อง", "เข้าสู่ระบบไม่สำเร็จ", MessagePanel.ERROR);   // กล่องแจ้งข้อผิดพลาด (ไอคอนแดงกากบาท)
+                    JOptionPane.showMessageDialog(this, "รหัสผ่านของผู้ดูแลระบบไม่ถูกต้อง", "เข้าสู่ระบบไม่สำเร็จ", JOptionPane.ERROR_MESSAGE);   // กล่องแจ้งข้อผิดพลาด (JOptionPane ไอคอนผิดพลาด)
                 } else {                                                      // รหัส + รหัสผ่านถูกต้อง
                     adminPage.getAdminName().setText(name);                   // ชื่อ admin มุมขวาบน
                     showAdmin();                                              // → ไปหน้าผู้ดูแลระบบ
@@ -302,7 +304,7 @@ public class AppFrame extends JFrame implements ActionListener, MouseListener { 
                 ArrayList<User> users = UserService.loadUsers();              // อ่านผู้ใช้ทั้งหมดจากไฟล์
                 String error = UserService.validateLogin(users, id, password);   // ตรวจรหัสนิสิต + รหัสผ่าน
                 if (error != null) {                                          // ไม่ผ่าน
-                    MessagePanel.showMessage(this, error, "เข้าสู่ระบบไม่สำเร็จ", MessagePanel.ERROR);   // กล่องแจ้งข้อผิดพลาด (ไอคอนแดงกากบาท)
+                    JOptionPane.showMessageDialog(this, error, "เข้าสู่ระบบไม่สำเร็จ", JOptionPane.ERROR_MESSAGE);   // กล่องแจ้งข้อผิดพลาด (JOptionPane ไอคอนผิดพลาด)
                 } else {                                                      // ผ่าน
                     setCurrentUser(UserService.findUser(users, id));          // ใส่ชื่อ/รหัสของผู้ใช้คนนี้ในทุกหน้า
                     loginPage.getPasswordBox().clear();                       // ล้างช่องรหัสผ่าน

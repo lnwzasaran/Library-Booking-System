@@ -95,7 +95,7 @@ public class IconPanel extends JPanel {   // สืบทอด JPanel แล้
         picture = loadImage(file, size, size);   // โหลดรูปจากโฟลเดอร์ icons แล้วย่อให้เท่า size
     }                                            // จบคอนสตรักเตอร์
 
-    // โหลดรูปชื่อ file จากโฟลเดอร์ icons แล้วย่อเป็น w x h (คลาสอื่นใช้ได้ด้วย เช่น MessagePanel) — หาไม่เจอคืน null
+    // โหลดรูปชื่อ file จากโฟลเดอร์ icons แล้วย่อเป็น w x h (คลาสอื่นใช้ได้ด้วย) — หาไม่เจอคืน null
     public static Image loadImage(String file, int w, int h) {
         ImageIcon img = new ImageIcon(AppPath.find("icons/" + file).getPath());   // โหลดรูป (AppPath หาโฟลเดอร์ icons ให้)
         if (img.getIconWidth() <= 0) {                                              // หาไฟล์ไม่เจอ (ความกว้างเป็น -1)

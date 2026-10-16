@@ -30,7 +30,6 @@ public class MyBookingsPage extends JPanel implements ActionListener {   // ส�
     private JPanel body;                          // กล่องใส่ตารางทั้งสอง (ล้างแล้วสร้างใหม่ทุกครั้งที่ refresh)
     private String studentId = "";                // รหัสนิสิตของผู้ที่ดูหน้านี้อยู่
     private RoundButton[] cancelButtons = new RoundButton[0];   // ปุ่ม "ยกเลิก" ของการจองปัจจุบันแต่ละแถว (Array)
-    private Booking pendingCancel = null;                     // การจองที่กำลังถามยืนยันยกเลิก (รอกด "ใช่")
     private ArrayList<Booking> currentList = new ArrayList<>(); // การจองปัจจุบัน เรียงตรงกับปุ่ม (ปุ่มที่ i = การจองที่ i)
 
     public MyBookingsPage() {                     // คอนสตรักเตอร์
@@ -134,19 +133,7 @@ public class MyBookingsPage extends JPanel implements ActionListener {   // ส�
     }                                                                  // จบ toRow
 
     // ================= ActionListener (ปุ่มยกเลิก) =================
-    public void actionPerformed(ActionEvent e) {                       // ทำงานเมื่อกดปุ่มยกเลิกแถวใดก็ได้ หรือกด "ใช่" ในกล่องยืนยัน
-        if (MessagePanel.isYesButton(e.getSource())) {                 // กด "ใช่" ในกล่องยืนยัน
-            Booking b = pendingCancel;                                 // การจองที่ถามไว้
-            pendingCancel = null;                                      // ล้างทิ้ง
-            if (b != null && BookingService.cancel(b.getId(), b.getDate(), studentId)) {   // เปลี่ยนสถานะในไฟล์เป็น CANCELLED
-                refresh(studentId);                                    // สร้างตารางใหม่ → แถวนี้ย้ายไปประวัติ ป้าย "ยกเลิกแล้ว"
-                MessagePanel.showMessage(this, "ยกเลิกการจอง " + b.getId() + " เรียบร้อยแล้ว สามารถจองห้องใหม่ได้",
-                        "ยกเลิกสำเร็จ", MessagePanel.INFO);           // แจ้งผลให้ผู้ใช้รู้ (จองได้ครั้งละ 1 รายการ จึงบอกว่าจองใหม่ได้แล้ว)
-            } else {                                                   // บันทึกไฟล์ไม่ได้
-                MessagePanel.showMessage(this, "ยกเลิกการจองไม่สำเร็จ กรุณาลองใหม่", "ยกเลิกไม่สำเร็จ", MessagePanel.ERROR);   // แจ้งผู้ใช้
-            }                                                          // จบ if
-            return;                                                    // จบ
-        }                                                              // จบ if
+    public void actionPerformed(ActionEvent e) {                       // ทำงานเมื่อกดปุ่มยกเลิกแถวใดก็ได้
         for (int i = 0; i < cancelButtons.length; i++) {               // วนหาว่ากดปุ่มของแถวไหน
             if (e.getSource() == cancelButtons[i]) {                   // ถ้าเป็นปุ่มของแถวที่ i
                 confirmCancel(currentList.get(i));                     // ถามยืนยันก่อนยกเลิก
@@ -155,12 +142,20 @@ public class MyBookingsPage extends JPanel implements ActionListener {   // ส�
         }                                                              // จบ for
     }                                                                  // จบ actionPerformed
 
-    // กล่องถามยืนยัน ปุ่ม "ใช่" / "ไม่" (MessagePanel — กล่องข้อความแบบ JPanel)
-    // กล่อง JPanel ไม่หยุดรอคำตอบ จึงจำการจองไว้ก่อน แล้วรอ actionPerformed ตอนกด "ใช่"
+    // กล่องถามยืนยัน ปุ่ม "ใช่" / "ไม่" (JOptionPane.showConfirmDialog — หยุดรอจนผู้ใช้กดปุ่ม แล้วคืนค่าปุ่มที่กด)
     private void confirmCancel(Booking b) {
-        pendingCancel = b;                                             // จำว่ากำลังถามเรื่องการจองไหน
-        MessagePanel.showConfirm(this, "คุณแน่ใจว่าจะกดยกเลิก?",          // ข้อความคำถาม
-                "ยกเลิกการจอง " + b.getId(), this);                      // ชื่อกล่อง, กด "ใช่" → actionPerformed ของหน้านี้
+        int answer = JOptionPane.showConfirmDialog(this, "คุณแน่ใจว่าจะกดยกเลิก?",   // ข้อความคำถาม
+                "ยกเลิกการจอง " + b.getId(), JOptionPane.YES_NO_OPTION);            // ชื่อกล่อง + ปุ่ม ใช่ / ไม่
+        if (answer != JOptionPane.YES_OPTION) {                        // กด "ไม่" หรือปิดกล่อง
+            return;                                                    // ไม่ทำอะไร
+        }                                                              // จบ if
+        if (BookingService.cancel(b.getId(), b.getDate(), studentId)) {   // เปลี่ยนสถานะในไฟล์เป็น CANCELLED
+            refresh(studentId);                                        // สร้างตารางใหม่ → แถวนี้ย้ายไปประวัติ ป้าย "ยกเลิกแล้ว"
+            JOptionPane.showMessageDialog(this, "ยกเลิกการจอง " + b.getId() + " เรียบร้อยแล้ว สามารถจองห้องใหม่ได้",
+                    "ยกเลิกสำเร็จ", JOptionPane.INFORMATION_MESSAGE);   // แจ้งผลให้ผู้ใช้รู้ (จองได้ครั้งละ 1 รายการ จึงบอกว่าจองใหม่ได้แล้ว)
+        } else {                                                       // บันทึกไฟล์ไม่ได้
+            JOptionPane.showMessageDialog(this, "ยกเลิกการจองไม่สำเร็จ กรุณาลองใหม่", "ยกเลิกไม่สำเร็จ", JOptionPane.ERROR_MESSAGE);   // แจ้งผู้ใช้
+        }                                                              // จบ if
     }                                                                  // จบ confirmCancel
 
     // หัวข้อของแต่ละตาราง เช่น "การจองปัจจุบัน" (y = ตำแหน่งในหน้า)
